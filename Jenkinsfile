@@ -1,8 +1,6 @@
 pipeline {
     agent any
-    tools { 
-        nodejs 'Node 20' 
-    }
+    
     stages {
         stage('Checkout') {
             steps {
@@ -11,73 +9,59 @@ pipeline {
             }
         }
 
-        // stage('Install Backend Dependencies') {
-        //     steps {
-        //         echo 'Installing backend deps...'
-        //         dir('CareFlow-BackEnd') {
-        //             path 'npm install'
-        //         }
-        //     }
-        // }
-
-        stage('Install Frontend Dependencies') {
+        stage('Check Environment') {
             steps {
-                echo 'Installing frontend deps...'
-                dir('CareFlow-FrontEnd') {
-                    path 'npm install'
-                }
+                echo 'Checking environment...'
+                sh 'pwd && ls -la'
+            }
+        }
+        
+        stage('Mock Install Dependencies') {
+            steps {
+                echo 'Would install dependencies with: npm ci'
+                echo 'Simulating dependency installation...'
+            }
+        }
+        
+        stage('Mock Lint') {
+            steps {
+                echo 'Would run linting with: npm run lint'
+                echo 'Simulating code linting...'
             }
         }
 
-        stage('Test') {
+        stage('Mock Test') {
             steps {
-                echo 'Running Tests...'
-                // dir('CareFlow-BackEnd') { path 'npm test || true' }
-                // dir('CareFlow-FrontEnd') { path 'npm test || true' }
+                echo 'Would run tests with: npm run test'
+                echo 'Simulating test execution...'
             }
         }
-
-
-    //     stage('Test_0') {
-    // parallel {
-    //     stage('Backend Tests') {
-    //         steps {
-    //             echo 'Running Backend Tests...'
-    //             // dir('CareFlow-BackEnd') {
-    //             //     path 'npm test || true'
-    //             // }
-    //         }
-    //     }
-
-//         stage('Frontend Tests') {
-//             steps {
-//                 echo 'Running Frontend Tests...'
-//                 // dir('CareFlow-FrontEnd') {
-//                 //     path 'npm test || true'
-//                 // }
-//             }
-//         }
-//     }
-// }
-
-
-//        stage('Docker Compose Up') {
-//     steps {
-//         echo 'Starting Containers...'
-//         path 'docker-compose -d --build'
-//     }
-// }
-
+        
+        stage('Mock Build') {
+            steps {
+                echo 'Would build with: npm run build'
+                echo 'Simulating build process...'
+                sh 'mkdir -p dist && echo "Build output" > dist/index.html'
+            }
+        }
+        
+        stage('Archive Artifacts') {
+            steps {
+                echo 'Archiving build artifacts...'
+                archiveArtifacts artifacts: 'dist/**', fingerprint: true
+            }
+        }
     }
 
     post {
-    success {
-        echo 'Build succeeded, cleaning up...'
-        // path 'docker compose down || true'
+        always {
+            cleanWs()
+        }
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
     }
-    failure {
-        echo 'Build failed, cleaning up...'
-        // path 'docker compose down || true'
-    }
-}
 }
